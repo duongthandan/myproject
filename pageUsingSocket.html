@@ -1,0 +1,47 @@
+<script type = "text/javascript" src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://192.168.73.130:8081');
+  function register(){  
+		var id = $("#idTxt").val();
+		socket.on('hasMsg' + id, function (data) {
+			console.log(data.msg);
+			$("#content").append("<div style='background-color: aliceblue;'>" + data.msg + "</div>");
+		});
+  }
+  
+  function sendMessage(){
+	var msgTxt = $('#msgTxt').val();
+	var file = $("#file")[0];
+	if (msgTxt.length) {
+		$('#msgTxt').val('');
+		socket.emit('send', { msg: msgTxt, toId:  $('#toTxt').val()});
+		$("#content").append("<div>" + msgTxt + "</div>");
+	} else if(file.files.length && file.files[0].type == "text/plain") {
+		$("#file").val('');
+		
+		var fr = new FileReader();
+		fr.onload = function(){
+			socket.emit('send', { msg: fr.result, toId:  $('#toTxt').val()});
+		};
+		fr.readAsText (file.files[0]);
+		$("#content").append("<div>Send file: " + file.files[0].name + "</div>");
+	}
+  }
+  
+</script>
+
+ID: <input type="text" id="idTxt"/>
+<input type="button" onclick="register()" value="Register"/>
+
+<br/>
+<form id="data" enctype="multipart/form-data">
+	Send to: <input type="text" id="toTxt"/>
+	Message: <input type="text" id="msgTxt"/>
+	File: <input type="file" id="file"/>
+	<input type="button" onclick="sendMessage()" value="Send"/>
+</form>
+
+<div id="content" style="width:600px">
+
+</div>

@@ -1,0 +1,16 @@
+<div ng-controller="HelloController">
+	<label>Name:</label>
+	<input type = "text" ng-model = "yourName" placeholder = "Enter a name here">
+	<hr />
+
+	<h1>Hello {{yourName}}!</h1>
+	<span ng-bind="yourName"></span>
+	<h3>Welcome to {{hello.title}}</h3>
+
+	<script>
+	angular.module("myApp", []).controller("HelloController", function($scope){
+		$scope.hello = {};
+		$scope.hello.title = 'Angular JS Tutorial';
+	});
+	</script>
+</div>
