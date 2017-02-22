@@ -1,0 +1,72 @@
+<form id="testForm">
+	<input id="keydown" type="checkbox"> <label for="keydown">keydown</label><br>
+	<input id="keypress" type="checkbox"> <label for="keypress">keypress</label><br>
+	<input id="keyup" type="checkbox"> <label for="keyup">keyup</label><br>
+	<input id="default" type="checkbox"> <label for="default">Suppress default action</label><br>
+
+
+	<button id="emptyWriteroot">Remove messages</button>
+</form>
+
+<p id="writeroot"></p>
+
+<style type="text/css">
+#writeroot {
+	height: 300px;
+	width: 300px;
+	overflow: auto;
+	border: 1px solid #2EB2DC;
+}
+
+</style>
+<script src="quirksmode.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+	document.defaultAction = true;
+
+	function init() {
+		var x = document.getElementById('testForm').getElementsByTagName('input');
+		for (var i=0;i<x.length;i++) {
+			x[i].onclick = setEvents;
+			if (x[i].checked)
+				x[i].onclick();
+		}
+		writeroot = document.getElementById('writeroot');
+		document.getElementById('emptyWriteroot').onclick = function () {
+			writeroot.innerHTML = '';
+			return false;
+		}
+	}
+
+	function setEvents() {
+		if (this.id == 'default') {
+			document.defaultAction = !this.checked;
+			return;
+		}
+		var eventHandler = (this.checked) ? detectEvent : empty;
+		document['on'+this.id] = eventHandler;
+	}
+
+	function detectEvent(e) {
+		var evt = e || window.event;
+		evt.returnValue = false;
+		evt.cancelBubble = true;
+		
+		writeData(evt.type);
+		writeData('keyCode is ' + evt.keyCode);
+		writeData('charCode is ' + evt.charCode);
+		writeData('');
+		return document.defaultAction;
+	}
+
+	function empty() {
+		// nothing
+	}
+
+	var writeroot;
+
+	function writeData(msg) {
+		writeroot.innerHTML += msg + '<br />';
+	}
+
+</script>
