@@ -21,6 +21,17 @@ app.get("/sayhello", function(req, res){
 	res.end();
 });
 
+app.get("/key", function(req, res){
+	var template = fs.readFileSync('template.html').toString();
+	var formAngular = fs.readFileSync('key.html').toString();
+	var page = template.replace("##CONTENT##", formAngular);
+	
+	//console.log(__dirname);
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	res.write(page);
+	res.end();
+});
+
 app.get("/process_get", function(req, res){
 	var response = {
 		first_name:req.query.first_name,
