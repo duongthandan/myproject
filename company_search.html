@@ -1,0 +1,40 @@
+<div ng-controller="SearchCompanyController">
+	<label>Company name:</label>
+	<input type = "text" ng-model = "companyName" placeholder = "Company name">
+	<input type = "button" value="Search" ng-click="searchCompany()">
+	<hr />
+
+	<h1>Hitlist</h1>
+	
+	 <table style="width:700px">
+		<tr>
+		   <th width="20%">Id</th>
+		   <th width="60%">Name</th>
+		   <th width="20%">Status</th>
+		</tr>
+	 
+		<tr ng-repeat = "hit in hitlist">
+		   <td><a href="/companydetail?id={{ hit.id }}">{{ hit.id }}</a></td>
+		   <td>{{ hit.name }}</td>
+		   <td>{{ hit.status }}</td>
+		</tr>
+	 </table>
+	
+
+	<script>
+		angular.module("myApp", []).controller("SearchCompanyController", function($scope){
+			$scope.hitlist = {};
+			$scope.searchCompany = function() {
+				var url = "/dosearch?companyName=" + $scope.companyName;
+				console.log(url);
+			 
+				$.get(url, function(data, status){
+					$scope.hitlist = JSON.parse(data);
+					$scope.$apply();
+				});
+			}
+		});
+	
+         
+	</script>
+</div>

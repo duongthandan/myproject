@@ -1,0 +1,26 @@
+<div ng-controller="SearchDetailController">
+			
+	 <table style="width:700px">
+		<tr>
+		   <td width="20%">Company name:</th>
+		   <td width="80%">{{companyDetail.companyName}}</th>
+		</tr>
+		<tr>
+		   <td width="20%">Address:</th>
+		   <td width="80%">{{companyDetail.address()}}</th>
+		</tr>
+	 </table>
+	
+
+	<script>
+		angular.module("myApp", []).controller("SearchDetailController", function($scope){
+			$scope.companyDetail = ##COMPANY_DETAIL##;
+			$scope.companyDetail.address = function() {
+				console.log($scope.companyDetail.domicile.streetNr + ", " + $scope.companyDetail.domicile.city + ", " + $scope.companyDetail.domicile.state);
+				return $scope.companyDetail.domicile.streetNr + ", " + $scope.companyDetail.domicile.city + ", " + $scope.companyDetail.domicile.state;
+			};
+		});
+	
+         
+	</script>
+</div>

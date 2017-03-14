@@ -2,34 +2,103 @@ var express = require("express");
 //var oracledb = require('oracledb');
 
 var fs = require("fs");
+var request = require("request");
+var querystring = require("querystring");
 var app = express();
 
 app.use(express.static('public'));
 app.get("/", function(req, res){
+	
+	//test 
+	var request = require('request');
+	request('http://ofwi-int-vn-hcm.aavn.local:9230', function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			console.log(body) // Print the google web page.
+		 }
+	})
+
+
+
 	console.log(__dirname);
 	res.sendFile(__dirname + "/" + "form.html");
 });
 
-app.get("/sayhello", function(req, res){
+function buildPageFromTemplate(fileContent) {
 	var template = fs.readFileSync('template.html').toString();
-	var formAngular = fs.readFileSync('form_angular.html').toString();
-	var page = template.replace("##CONTENT##", formAngular);
-	
-	//console.log(__dirname);
+	var contentHtml = fs.readFileSync(fileContent).toString();
+	var page = template.replace("##CONTENT##", contentHtml);
+	return page;
+}
+
+function buildResponse(res, page) {
 	res.writeHead(200, {'Content-Type': 'text/html'});
 	res.write(page);
 	res.end();
+}
+
+app.get("/sayhello", function(req, res){
+	var page = buildPageFromTemplate('form_angular.html');
+	buildResponse(res, page);
+});
+
+app.get("/dosearch", function(req, res){
+	var requestTemplate = fs.readFileSync('requestTemplate.txt').toString();
+	var requestComplete = requestTemplate.replace(/##COMPANY_NAME##/g, req.query.companyName);
+	
+	request.post({
+		headers: {'content-type' : 'application/x-www-form-urlencoded'},
+		url:     'http://ofwi-int-vn-hcm.aavn.local:9230/company-search-new/company/_search',
+		body:    requestComplete
+	}, function(error, response, body){
+		var obj = JSON.parse(body);
+
+		var result = [];
+		for (var i = 0; i < obj.hits.hits.length; ++i) {
+			var source = obj.hits.hits[i]._source;
+			var company = {};
+			company.id = obj.hits.hits[i]._id;
+			company.name = source.companyName;
+			company.status = source.status;
+			result.push(company);
+		}
+		
+		res.write(JSON.stringify(result));
+		res.end();
+	});
+});
+
+
+app.get("/companysearch", function(req, res){
+	var page = buildPageFromTemplate('company_search.html');
+	buildResponse(res, page);
+});
+
+app.get("/companydetail", function(req, res){
+	request.get({
+		headers: {'content-type' : 'application/x-www-form-urlencoded'},
+		url:     'http://ofwi-int-vn-hcm.aavn.local:9230/company-search-new/company/' + req.query.id,
+	}, function(error, response, body){
+		var obj = JSON.parse(body);
+		var source = obj._source;
+		var company = {};
+		company.id = obj._id;
+		company.companyName = source.companyName;
+		company.status = source.status;
+		company.domicile = {};
+		company.domicile.streetNr = source.domicileAddress.streetNr;
+		company.domicile.city = source.domicileAddress.city;
+		company.domicile.postcode = source.domicileAddress.postcode;
+		company.domicile.state = source.domicileAddress.state;
+		
+		var page = buildPageFromTemplate('company_detail.html');
+		page = page.replace("##COMPANY_DETAIL##", JSON.stringify(company));
+		buildResponse(res, page);
+	});
 });
 
 app.get("/key", function(req, res){
-	var template = fs.readFileSync('template.html').toString();
-	var formAngular = fs.readFileSync('key.html').toString();
-	var page = template.replace("##CONTENT##", formAngular);
-	
-	//console.log(__dirname);
-	res.writeHead(200, {'Content-Type': 'text/html'});
-	res.write(page);
-	res.end();
+	var page = buildPageFromTemplate('key.html');
+	buildResponse(res, page);
 });
 
 app.get("/process_get", function(req, res){

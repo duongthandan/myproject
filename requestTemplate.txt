@@ -1,0 +1,86 @@
+{
+	"from" : 0,
+	"size" : 20,
+	"min_score" : 0.5,
+	"query" : {
+		"filtered" : {
+			"query" : {
+				"bool" : {
+					"should" : [{
+							"query_string" : {
+								"fields" : ["companyName.partial"],
+								"query" : "##COMPANY_NAME##",
+								"analyzer" : "partial_name",
+								"boost" : 1.5
+							}
+						}, {
+							"query_string" : {
+								"fields" : ["companyName"],
+								"query" : "##COMPANY_NAME##",
+								"boost" : 8.0
+							}
+						}, {
+							"query_string" : {
+								"fields" : ["oldNames"],
+								"query" : "##COMPANY_NAME##"
+							}
+						}, {
+							"query_string" : {
+								"fields" : ["alternativeNames"],
+								"query" : "##COMPANY_NAME##"
+							}
+						}, {
+							"query_string" : {
+								"fields" : ["normalizedNames.partial"],
+								"query" : "##COMPANY_NAME##",
+								"analyzer" : "partial_name",
+								"boost" : 1.3
+							}
+						}, {
+							"fuzzy" : {
+								"normalizedNames" : "##COMPANY_NAME##"
+							}
+						}, {
+							"match" : {
+								"alternativeNames" : {
+									"query" : "##COMPANY_NAME##",
+									"type" : "phrase"
+								}
+							}
+						}, {
+							"match" : {
+								"oldNames" : {
+									"query" : "##COMPANY_NAME##",
+									"type" : "phrase"
+								}
+							}
+						}, {
+							"match" : {
+								"companyName" : {
+									"query" : "##COMPANY_NAME##",
+									"type" : "phrase"
+								}
+							}
+						}
+					]
+				}
+			},
+			"filter" : {
+				"or" : {
+					"filters" : [{
+							"bool" : {
+								"must" : [{
+										"term" : {
+											"isForeignParticipation" : "false"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		}
+	},
+	"fields" : ["_source"]
+}
