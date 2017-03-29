@@ -16,7 +16,6 @@
 		angular.module("myApp", []).controller("SearchDetailController", function($scope){
 			$scope.companyDetail = ##COMPANY_DETAIL##;
 			$scope.companyDetail.address = function() {
-				console.log($scope.companyDetail.domicile.streetNr + ", " + $scope.companyDetail.domicile.city + ", " + $scope.companyDetail.domicile.state);
 				return $scope.companyDetail.domicile.streetNr + ", " + $scope.companyDetail.domicile.city + ", " + $scope.companyDetail.domicile.state;
 			};
 		});

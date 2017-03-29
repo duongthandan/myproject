@@ -1,7 +1,9 @@
 <div ng-controller="SearchCompanyController">
 	<label>Company name:</label>
-	<input type = "text" ng-model = "companyName" placeholder = "Company name">
-	<input type = "button" value="Search" ng-click="searchCompany()">
+	<form id="searchForm">
+		<input type = "text" ng-model = "companyName" ng-keypress="keyPressOnCompanyName($event)" placeholder = "Company name">
+		<input type = "button" value="Search" ng-click="searchCompany()">
+	</form>
 	<hr />
 
 	<h1>Hitlist</h1>
@@ -22,17 +24,28 @@
 	
 
 	<script>
-		angular.module("myApp", []).controller("SearchCompanyController", function($scope){
+		angular.module("myApp", []).controller("SearchCompanyController", function($scope, $http){
 			$scope.hitlist = {};
 			$scope.searchCompany = function() {
-				var url = "/dosearch?companyName=" + $scope.companyName;
-				console.log(url);
-			 
-				$.get(url, function(data, status){
-					$scope.hitlist = JSON.parse(data);
+				
+				var dataForm = {};
+				dataForm["companyName"] = $scope.companyName;
+				
+				$http({
+					method: "POST",
+					url: "/dosearch",
+					data: JSON.stringify(dataForm)
+				}).then(function (response){
+					$scope.hitlist = response.data;
 					$scope.$apply();
 				});
-			}
+			};
+			
+			$scope.keyPressOnCompanyName = function(keyEvent) {
+				if (keyEvent.which == 13) {
+					this.searchCompany();
+				}
+			};
 		});
 	
          

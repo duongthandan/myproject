@@ -3,8 +3,12 @@ var express = require("express");
 
 var fs = require("fs");
 var request = require("request");
-var querystring = require("querystring");
+var bodyParser = require('body-parser')
 var app = express();
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+	extended: true
+})); 
 
 app.use(express.static('public'));
 app.get("/", function(req, res){
@@ -41,9 +45,9 @@ app.get("/sayhello", function(req, res){
 	buildResponse(res, page);
 });
 
-app.get("/dosearch", function(req, res){
+app.post("/dosearch", function(req, res){
 	var requestTemplate = fs.readFileSync('requestTemplate.txt').toString();
-	var requestComplete = requestTemplate.replace(/##COMPANY_NAME##/g, req.query.companyName);
+	var requestComplete = requestTemplate.replace(/##COMPANY_NAME##/g, req.body.companyName);
 	
 	request.post({
 		headers: {'content-type' : 'application/x-www-form-urlencoded'},
